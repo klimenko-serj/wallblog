@@ -1,5 +1,9 @@
 logs
 target
+node_modules
+frontend/node_modules
+public/javascripts
+.vscode
 /.idea
 /.idea_modules
 /.bloop
