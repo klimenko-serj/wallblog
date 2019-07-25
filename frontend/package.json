@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development --output ./../public/javascripts/main.js",
+    "dev-watch": "webpack --mode development --output ./../public/javascripts/main.js --watch",
     "build": "webpack --mode production --output ./../public/javascripts/main.js"
   },
   "keywords": [],
@@ -19,5 +20,9 @@
     "react-dom": "^16.8.6",
     "webpack": "^4.37.0",
     "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.2.1",
+    "@material-ui/icons": "^4.2.1"
   }
 }

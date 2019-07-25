@@ -9,7 +9,7 @@ import play.api.mvc._
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class PagesController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   /**
    * Create an Action to render an HTML page.
@@ -20,5 +20,13 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
    */
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index())
+  }
+
+  def signUp() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.signup())
+  }
+
+  def signIn() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.signin())
   }
 }
