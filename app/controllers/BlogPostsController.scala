@@ -11,18 +11,22 @@ import scala.concurrent.{ ExecutionContext, Future }
 import models.{ User, BlogPost }
 import storage.BlogPostStorage
 
-@Singleton
-class BlogPostsController @Inject()(implicit cc: ControllerComponents, postsStorage: BlogPostStorage) extends AbstractController(cc) {
-
-  implicit def ec: ExecutionContext = cc.executionContext
-
+trait WithPostJSON extends WithUserJSON {
   implicit val postWrites = new Writes[BlogPost] {
     def writes(post: BlogPost) = Json.obj(
       "id" -> post.id,
       "title" -> post.title ,
-      "content" -> post.content
+      "content" -> post.content,
+      "author" -> post.author,
+      "likes" -> post.likes
     )
   }
+}
+
+@Singleton
+class BlogPostsController @Inject()(implicit cc: ControllerComponents, postsStorage: BlogPostStorage) extends AbstractController(cc) with WithPostJSON {
+
+  implicit def ec: ExecutionContext = cc.executionContext
 
   def list() = Action.async {
    postsStorage.getAll().map { lst =>

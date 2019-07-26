@@ -16,13 +16,7 @@ import com.github.t3hnar.bcrypt._
 import models.{ User, UserLogin }
 import storage.UserStorage
 
-
-
-@Singleton
-class UsersController @Inject()(cc: ControllerComponents, usrStorage: UserStorage) extends AbstractController(cc) {
-
-  implicit def ec: ExecutionContext = cc.executionContext
-
+trait WithUserJSON {
   implicit val userReads: Reads[User] = (
     Reads[String](_ => JsSuccess[String]("")) and
     (JsPath \ "username").read[String](minLength[String](2)) and
@@ -44,6 +38,12 @@ class UsersController @Inject()(cc: ControllerComponents, usrStorage: UserStorag
       "lastName" -> user.lastName
     )
   }
+}
+
+@Singleton
+class UsersController @Inject()(cc: ControllerComponents, usrStorage: UserStorage) extends AbstractController(cc) with WithUserJSON {
+
+  implicit def ec: ExecutionContext = cc.executionContext
 
   def signUp() = Action.async(parse.json) {
     _.body.validate[User].map { user =>

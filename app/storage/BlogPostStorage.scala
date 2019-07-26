@@ -13,18 +13,21 @@ import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.{ Cursor, ReadPreference }
 
+import play.api.Logging
+
 trait WithBlogPostReaderAndWriter extends WithUserReaderAndWriter{
 
     implicit object BlogPostReader extends BSONDocumentReader[BlogPost] {
         def read(bson: BSONDocument): BlogPost = {
+
             val opt: Option[BlogPost] = for {
-                id        <- bson.getAs[String]("_id") // ???
+                id        <- bson.getAs[BSONObjectID]("_id")
                 title     <- bson.getAs[String]("title")
                 content   <- bson.getAs[String]("content")
-                timestamp <- bson.getAs[Long]("timestamp")
-                author    <- bson.getAs[User]("author")
+                timestamp <- bson.getAs[Double]("timestamp")
+                author    <- bson.getAs[List[User]]("author") flatMap (_.headOption)
                 likes     <- bson.getAs[List[User]]("likes")
-            } yield new BlogPost(id, title, content, timestamp, author, likes)
+            } yield new BlogPost(id.stringify, title, content, timestamp.toInt, author, likes)
 
             opt.get
         }
