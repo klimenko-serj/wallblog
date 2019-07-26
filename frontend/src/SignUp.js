@@ -1,19 +1,16 @@
 import React from 'react';
-import ReactDOM from "react-dom";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import axios from 'axios'
 
 const styles = theme => ({
   '@global': {
@@ -50,7 +47,52 @@ class SignUp extends React.Component {
     }
 
     doSignUp() {
+
+        let usrn = document.getElementById("username").value
+        let pwd  = document.getElementById("password").value
+        let usrFN = document.getElementById("firstName").value
+        let usrLN = document.getElementById("lastName").value
+        
+        if(!(usrn && pwd && usrFN && usrLN)){
+          alert("Fill all required fields!")
+          return;
+        }
+
+        if(pwd.length < 8) {
+          alert("Password is too short. (min 8 symbols)")
+          return
+        }
+
         this.setState({inProgress: true})
+        
+        axios.post('/api/signup', {
+            username: usrn,
+            password: pwd,
+            firstName: usrFN,
+            lastName: usrLN
+          })
+          .then(function (response) {
+            let rs = response.status;
+            if(rs == 201) {
+              alert("User is created! SignIn to write and like!")
+              window.location.replace("/signin");
+            } else {
+              this.setState({inProgress:false})
+              alert("Something went wrong...")
+            }
+          }.bind(this))
+          .catch(function (error) {
+            console.log(error);
+            let rs = error.response.status;
+            if(rs == 403) {
+              this.setState({inProgress:false});
+              alert("User with this username already exisits.");
+            } else {
+              this.setState({inProgress:false})
+              alert("Something went wrong...")
+            }
+          }.bind(this));
+        
     }
 
     render() {

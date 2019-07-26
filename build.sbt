@@ -11,7 +11,8 @@ libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.18.2-play27"
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.18.2-play27",
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 )
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.example.controllers._"

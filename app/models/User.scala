@@ -7,3 +7,8 @@ case class User(
     firstName: String,
     lastName: String
 )
+
+case class UserLogin(
+    username: String,
+    password: String
+)

@@ -13,6 +13,8 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import axios from 'axios'
 
 const styles = theme => ({
   '@global': {
@@ -44,6 +46,49 @@ export default withStyles(styles)(
 
         constructor(props){
             super(props)
+
+            this.state = {inProgress: false}
+        }
+        
+        doSignIn() {
+
+        let usrn = document.getElementById("username").value
+        let pwd  = document.getElementById("password").value
+        
+        if(!(usrn && pwd)){
+          alert("Fill all required fields!")
+          return;
+        }
+
+        this.setState({inProgress: true})
+        
+        axios.post('/api/signin', {
+            username: usrn,
+            password: pwd
+          })
+          .then(function (response) {
+            let rs = response.status;
+            if(rs == 200) {
+              window.location.replace("/");
+            } else {
+              this.setState({inProgress:false})
+              alert("Something went wrong...")
+            }
+          }.bind(this))
+          .catch(function (error) {
+            console.log(error);
+            let rs = error.response.status;
+            if(rs == 403) {
+              this.setState({inProgress:false});
+              alert("Wrong password!");
+            } else if(rs == 404) {
+              this.setState({inProgress:false})
+              alert("There is no user with such name...")
+            } else {
+              this.setState({inProgress:false})
+              alert("Something went wrong...")
+            }
+          }.bind(this));
         }
 
         render(){
@@ -82,15 +127,20 @@ export default withStyles(styles)(
                         id="password"
                         autoComplete="current-password"
                     />
+                    { (!this.state.inProgress) ? 
                     <Button
-                        type="submit"
+                        type="button"
                         fullWidth
                         variant="contained"
                         color="primary"
                         className={classes.submit}
+                        onClick={this.doSignIn.bind(this)}
                     >
                         Sign In
                     </Button>
+                    :
+                    <LinearProgress />
+                    }
                     <Grid container>
                         <Grid item>
                         <Link href="/signup" variant="body2">

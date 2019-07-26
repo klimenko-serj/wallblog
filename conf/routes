@@ -1,12 +1,20 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# https://www.playframework.com/documentation/latest/ScalaRouting
-# ~~~~
-
 # pages
 GET     /                           controllers.PagesController.index
 GET     /signup                     controllers.PagesController.signUp
 GET     /signin                     controllers.PagesController.signIn
+
+
+# api
++nocsrf
+POST    /api/signup                 controllers.UsersController.signUp
++nocsrf
+POST    /api/signin                 controllers.UsersController.signIn
+GET     /api/signout                controllers.UsersController.signOut
+GET     /api/current-user           controllers.UsersController.currentUser
+
+GET     /api/posts                 controllers.BlogPostsController.list
+POST    /api/posts                 controllers.BlogPostsController.add
+POST    /api/posts/like            controllers.BlogPostsController.like
 
 
 # Map static resources from the /public folder to the /assets URL path
