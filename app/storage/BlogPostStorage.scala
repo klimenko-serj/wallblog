@@ -24,7 +24,7 @@ trait WithBlogPostReaderAndWriter extends WithUserReaderAndWriter{
                 id        <- bson.getAs[BSONObjectID]("_id")
                 title     <- bson.getAs[String]("title")
                 content   <- bson.getAs[String]("content")
-                timestamp <- bson.getAs[Double]("timestamp")
+                timestamp <- bson.getAs[Long]("timestamp")
                 author    <- bson.getAs[List[User]]("author") flatMap (_.headOption)
                 likes     <- bson.getAs[List[User]]("likes")
             } yield new BlogPost(id.stringify, title, content, timestamp.toInt, author, likes)
@@ -36,12 +36,11 @@ trait WithBlogPostReaderAndWriter extends WithUserReaderAndWriter{
     implicit object BlogPostWriter extends BSONDocumentWriter[BlogPost] {
         def write(post: BlogPost): BSONDocument =
           BSONDocument(
-              // ??? "_id" -> BSONObjectID(user.id), how to convert string to BSONObjectID?
               "title" -> post.title,
               "content" -> post.content,
               "timestamp" -> post.timestamp,
-              "authorID" -> post.author.id,
-              "likesIDs" -> post.likes.map(_.id)
+              "authorID" -> BSONObjectID.parse(post.author.id).get,
+              "likesIDs" -> post.likes.map(lu => BSONObjectID.parse(lu.id).get)
           )
       }
 }
@@ -54,11 +53,13 @@ class BlogPostStorage @Inject()(implicit ec: ExecutionContext, reactiveMongoApi:
 
     def getAll(): Future[Seq[BlogPost]] = 
         blogPostCollection flatMap { bpCol =>
-            import bpCol.BatchCommands.AggregationFramework.Lookup
+            import bpCol.BatchCommands.AggregationFramework.{ Lookup, Sort, Descending }
 
             bpCol.aggregatorContext[BlogPost](
                 Lookup("users", "authorID", "_id", "author"),
-                List(Lookup("users", "likesIDs", "_id", "likes"))
+                List(
+                 Lookup("users", "likesIDs", "_id", "likes"),
+                 Sort(Descending("timestamp")))
             ).prepared.cursor
             .collect[Seq](-1, Cursor.FailOnError[Seq[BlogPost]]()) // ??? limit
         }

@@ -8,6 +8,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import axios from 'axios'
 import { Container, Card, CardHeader, CardContent, LinearProgress } from '@material-ui/core';
 
+import NewPostDialogst from "./NewPostDialog"
+import NewPostDialog from './NewPostDialog';
+
 const styles = theme => ({
   root: {
     flexGrow: 1,
@@ -29,8 +32,19 @@ export default withStyles(styles) (
 
       this.state = {
         currentUser: "loading",
-        posts: "loading"
+        posts: "loading",
+        dialogOpen: false
       }
+    }
+
+    reloadPosts() {
+      axios.get("/api/posts")
+      .then(function(response){
+        console.log(response)
+        this.setState({
+          posts: response.data
+        })
+      }.bind(this))
     }
 
     componentDidMount() {
@@ -42,13 +56,7 @@ export default withStyles(styles) (
         })
       }.bind(this))
 
-      axios.get("/api/posts")
-      .then(function(response){
-        console.log(response)
-        this.setState({
-          posts: response.data
-        })
-      }.bind(this))
+      this.reloadPosts.bind(this)()
     }
 
     goSignIn() {
@@ -67,6 +75,35 @@ export default withStyles(styles) (
           currentUser: {}
         })
       }.bind(this))
+    }
+
+    showNewPostDialog() {
+      this.setState({dialogOpen: true})
+    }
+
+    newPostDialogOnClose(resPost) {
+      console.log("dialog closed:")
+      console.log(resPost)
+      this.setState({ dialogOpen: false })
+
+      if(resPost) {
+        axios.post('/api/posts', resPost)
+        .then(function (response) {
+          let rs = response.status;
+          if(rs == 200) {
+            console.log(response)
+            this.reloadPosts.bind(this)()
+          } else {
+            this.setState({inProgress:false})
+            alert("Something went wrong...")
+          }
+        }.bind(this))
+        .catch(function (error) {
+          console.log(error);
+          this.setState({inProgress:false})
+          alert("Something went wrong...")
+        }.bind(this));
+      }
     }
 
     render() {
@@ -103,7 +140,8 @@ export default withStyles(styles) (
             </Toolbar>
           </AppBar>
           <Container>
-            {(this.state.currentUser.username)?<Button> + Add Post </Button>:""}
+            <NewPostDialog open={this.state.dialogOpen} onClose={this.newPostDialogOnClose.bind(this)} />
+            {(this.state.currentUser.username)?<Button onClick = {this.showNewPostDialog.bind(this)}> + Add Post </Button>:""}
 
             { (this.state.posts == "loading")? <LinearProgress /> : 
               <div>

@@ -28,13 +28,16 @@ trait WithUserReaderAndWriter {
     }
 
     implicit object UserWriter extends BSONDocumentWriter[User] {
-        def write(user: User): BSONDocument =
-          BSONDocument(
+        def write(user: User): BSONDocument = {
+          val d = BSONDocument(
               "username" -> user.username,
               "password" -> user.password,
               "firstName" -> user.firstName,
               "lastName" -> user.lastName
           )
+
+          if(user.id == "") d else d ++ (BSONDocument("_id" -> BSONObjectID.parse(user.id).get))
+        }
     }
 }
 

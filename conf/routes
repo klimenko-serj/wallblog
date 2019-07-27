@@ -13,7 +13,9 @@ GET     /api/signout                controllers.UsersController.signOut
 GET     /api/current-user           controllers.UsersController.currentUser
 
 GET     /api/posts                 controllers.BlogPostsController.list
++nocsrf
 POST    /api/posts                 controllers.BlogPostsController.add
++nocsrf
 POST    /api/posts/like            controllers.BlogPostsController.like
 
 

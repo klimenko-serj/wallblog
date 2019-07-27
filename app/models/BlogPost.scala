@@ -8,3 +8,8 @@ case class BlogPost(
     author: User,
     likes: List[User]
 )
+
+case class AddBlogPost(
+    title: String,
+    content: String
+)

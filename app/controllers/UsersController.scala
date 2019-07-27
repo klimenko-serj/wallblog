@@ -15,6 +15,7 @@ import com.github.t3hnar.bcrypt._
 
 import models.{ User, UserLogin }
 import storage.UserStorage
+import security.UserIdKey
 
 trait WithUserJSON {
   implicit val userReads: Reads[User] = (
@@ -60,18 +61,18 @@ class UsersController @Inject()(cc: ControllerComponents, usrStorage: UserStorag
       usrStorage.findUserByName(userLogin.username).map { _ match {
         case None => NotFound
         case Some(u) => if (userLogin.password.isBcrypted(u.password)){
-           Ok("Logged in!").withSession(request.session + ("user_id" -> u.id))
+           Ok("Logged in!").withSession(request.session + (UserIdKey -> u.id))
            } else Forbidden("Wrong password")
       }}
     }.getOrElse(Future.successful(BadRequest("Invalid User format")))
   }
 
   def signOut() = Action { implicit request: Request[AnyContent] =>
-    Ok("signed out").withSession(request.session - "user_id")
+    Ok("signed out").withSession(request.session - UserIdKey)
   }
 
   def currentUser() = Action.async { implicit request: Request[AnyContent] =>
-    request.session.get("user_id").map({ uid:String =>
+    request.session.get(UserIdKey).map({ uid:String =>
       usrStorage.getUser(uid) map { _ match {
         case None => Ok("")
         case Some(u) => Ok(Json.toJson(u))
