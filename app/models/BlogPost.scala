@@ -13,3 +13,5 @@ case class AddBlogPost(
     title: String,
     content: String
 )
+
+case class BlogPostLike(postID: String)

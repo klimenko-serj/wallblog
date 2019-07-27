@@ -63,4 +63,27 @@ class BlogPostStorage @Inject()(implicit ec: ExecutionContext, reactiveMongoApi:
             ).prepared.cursor
             .collect[Seq](-1, Cursor.FailOnError[Seq[BlogPost]]()) // ??? limit
         }
+
+    def like(postID: String, userID: String): Future[Option[BlogPost]] = {
+
+        val bsonPostID = BSONObjectID.parse(postID).get
+        val bsonUserID = BSONObjectID.parse(userID).get
+
+        blogPostCollection.flatMap { bpCol => 
+            import bpCol.BatchCommands.AggregationFramework.{ Lookup, Match }
+            
+            for {
+                upd <- bpCol.update(ordered=false).one(
+                    BSONDocument("_id" -> bsonPostID),
+                    BSONDocument("$addToSet" -> BSONDocument("likesIDs" -> bsonUserID)))
+                
+                res <- bpCol.aggregateWith[BlogPost](){ _ =>
+                    (Match(BSONDocument("_id" -> bsonPostID)),
+                     List(
+                      Lookup("users", "authorID", "_id", "author"),
+                      Lookup("users", "likesIDs", "_id", "likes")))
+                }.headOption
+            } yield res
+        }
+    }
 }

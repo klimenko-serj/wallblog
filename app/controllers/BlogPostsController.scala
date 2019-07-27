@@ -11,12 +11,15 @@ import play.api.libs.functional.syntax._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-import models.{ User, BlogPost, AddBlogPost }
+import models.{ User, BlogPost, AddBlogPost, BlogPostLike }
 import storage.BlogPostStorage
 import security.{ SecuredAction, UserRequest }
 
 trait WithPostJSON extends WithUserJSON {
   
+  implicit val blogPostLikeReads: Reads[BlogPostLike] = 
+    (JsPath \ "postID").read[String].map(pid => BlogPostLike(pid))
+
   implicit val addPostReads: Reads[AddBlogPost] = (
     (JsPath \ "title").read[String](minLength[String](1)) and
     (JsPath \ "content").read[String](minLength[String](1))
@@ -53,7 +56,12 @@ class BlogPostsController @Inject()(implicit cc: ControllerComponents, postsStor
     }.getOrElse(Future.successful(BadRequest("Invalid BlogPost format")))
   }
 
-  def like() = Action { implicit request: Request[AnyContent] =>
-   NotImplemented 
+  def like() = securedAction.async(parse.json) { implicit request =>
+    request.body.validate[BlogPostLike].map { postLikeID => 
+      postsStorage.like(postLikeID.postID, request.currentUser.id).map{ _ match {
+        case None => InternalServerError
+        case Some(bp) => Ok(Json.toJson(bp))
+      }}
+    }.getOrElse(Future.successful(BadRequest("Invalid LikeRequest format")))
   }
 }

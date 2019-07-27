@@ -6,7 +6,9 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import axios from 'axios'
-import { Container, Card, CardHeader, CardContent, LinearProgress } from '@material-ui/core';
+import { Container, Card, CardHeader, CardContent, CardActions,
+   IconButton, Tooltip, LinearProgress } from '@material-ui/core';
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 import NewPostDialogst from "./NewPostDialog"
 import NewPostDialog from './NewPostDialog';
@@ -106,6 +108,25 @@ export default withStyles(styles) (
       }
     }
 
+    likePost(postId) {
+      axios.post('/api/posts/like', {postID: postId})
+        .then(function (response) {
+          let rs = response.status;
+          if(rs == 200) {
+            console.log(response)
+            this.reloadPosts.bind(this)()
+          } else {
+            this.setState({inProgress:false})
+            alert("Something went wrong...")
+          }
+        }.bind(this))
+        .catch(function (error) {
+          console.log(error);
+          this.setState({inProgress:false})
+          alert("Something went wrong...")
+        }.bind(this));
+    }
+
     render() {
       const { classes } = this.props;
 
@@ -149,13 +170,23 @@ export default withStyles(styles) (
                 this.state.posts.map((v, i) => {
                   return (
                     <Card key={v.id}>
-                    <CardHeader title={ v.title } />
+                    <CardHeader title={ v.title } subheader={"by " + v.author.firstName + " " + v.author.lastName} />
                       
                     <CardContent>
                       <Typography variant="body2" color="textSecondary" component="p">
                         { v.content }
                       </Typography>
                     </CardContent>
+                    <CardActions disableSpacing>
+                        <IconButton onClick={_ => this.likePost.bind(this)(v.id)} aria-label="add to favorites">
+                          <FavoriteIcon />
+                        </IconButton>
+                        <Tooltip title={v.likes.map(l => l.firstName + " " + l.lastName).join(", ")} aria-label="add">
+                        <Typography> 
+                          {v.likes.length}
+                        </Typography>
+                        </Tooltip>
+                    </CardActions>
                   </Card>
                 )})}
                 </div>
