@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      - WALLBLOG_SECRET=123hjklskfh4567ljhaduiwhje8sdfjkksd90
+      - WALLBLOG_MONGODB_URI=mongodb://mongo:27017/wallblog_dev
+    links:
+      - "mongo"
+
+  
+  mongo:
+    image: mongo
+    volumes: 
+      - "mongo-data:/data/db"
+
+volumes:
+  mongo-data:
