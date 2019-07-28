@@ -1,5 +1,6 @@
 logs
 target
+dist
 node_modules
 frontend/node_modules
 public/javascripts

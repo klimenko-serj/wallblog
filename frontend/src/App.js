@@ -42,7 +42,6 @@ export default withStyles(styles) (
     reloadPosts() {
       axios.get("/api/posts")
       .then(function(response){
-        console.log(response)
         this.setState({
           posts: response.data
         })
@@ -52,7 +51,6 @@ export default withStyles(styles) (
     componentDidMount() {
       axios.get("/api/current-user")
       .then(function(response){
-        console.log(response)
         this.setState({
           currentUser: response.data
         })
@@ -72,7 +70,6 @@ export default withStyles(styles) (
     goSignOut() {
       axios.get("/api/signout")
       .then(function(response){
-        console.log(response)
         this.setState({
           currentUser: {}
         })
@@ -84,8 +81,6 @@ export default withStyles(styles) (
     }
 
     newPostDialogOnClose(resPost) {
-      console.log("dialog closed:")
-      console.log(resPost)
       this.setState({ dialogOpen: false })
 
       if(resPost) {
@@ -93,7 +88,6 @@ export default withStyles(styles) (
         .then(function (response) {
           let rs = response.status;
           if(rs == 200) {
-            console.log(response)
             this.reloadPosts.bind(this)()
           } else {
             this.setState({inProgress:false})
@@ -113,7 +107,6 @@ export default withStyles(styles) (
         .then(function (response) {
           let rs = response.status;
           if(rs == 200) {
-            console.log(response)
             this.reloadPosts.bind(this)()
           } else {
             this.setState({inProgress:false})
