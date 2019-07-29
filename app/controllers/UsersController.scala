@@ -68,7 +68,7 @@ class UsersController @Inject()(cc: ControllerComponents, usrStorage: UserStorag
   }
 
   def signOut() = Action { implicit request: Request[AnyContent] =>
-    Ok("signed out").withSession(request.session - UserIdKey)
+    Ok("signed out").withNewSession
   }
 
   def currentUser() = Action.async { implicit request: Request[AnyContent] =>
