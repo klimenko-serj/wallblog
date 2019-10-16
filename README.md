@@ -1,3 +1,6 @@
+Scala Play Framework 2 experiments
+----------------------------------
+
 Requires:
 - sbt
 - npm
